@@ -43,7 +43,7 @@ int main(int argc, char **argv)
     const int MIN_MONTH = 0;
     const int MAX_MONTH = 11;
 
-    WINDOW *win;
+    WINDOW *win = NULL;
     t_options options;
     t_date today;
 
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
     }
     catch (const std::exception &e)
     {
-        delwin(win);
+        if (win != NULL) delwin(win);
         std::cerr << "Error: " << e.what() << std::endl;
         finish(1);
     }
