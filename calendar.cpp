@@ -42,6 +42,16 @@ int main(int argc, char **argv)
         init_pair(1, COLOR_WHITE, COLOR_BLUE);
         init_pair(2, COLOR_WHITE, COLOR_RED);
 
+#define COLOR_WINDOW (COLOR_PAIR(0))
+#define COLOR_CALENDAR (COLOR_PAIR(1))
+#define COLOR_HIGHLIGHT (COLOR_PAIR(2))
+
+#define COLOR_CALENDAR_UNDERLINE (COLOR_CALENDAR | A_UNDERLINE)
+#define COLOR_CALENDAR_BOLD (COLOR_CALENDAR | A_BOLD)
+
+#define COLOR_HEADER (COLOR_HIGHLIGHT | A_BOLD)
+#define COLOR_CURRENT_DAY (COLOR_HEADER | A_REVERSE)
+
         current_date(today);
         int year = options.year > 0 ? options.year : today.year;
         int month = options.month >= 0 ? options.month : today.month;
@@ -144,7 +154,7 @@ void mvwputnum(WINDOW *win, int y, int x, int num, int width)
 
 void erase_window(WINDOW *win)
 {
-    wbkgd(win, COLOR_PAIR(0));
+    wbkgd(win, COLOR_WINDOW);
     werase(win);
     wrefresh(win);
 }
@@ -152,7 +162,7 @@ void erase_window(WINDOW *win)
 WINDOW *create_calendar_window(int height, int width, int y, int x)
 {
     WINDOW *win = newwin(height, width, y, x);
-    wbkgd(win, COLOR_PAIR(1));
+    wbkgd(win, COLOR_CALENDAR);
     box(win, 0, 0);
     wrefresh(win);
     return win;
@@ -218,9 +228,9 @@ WINDOW *show_calendar(int year, int month)
     if (LINES < height || COLS < width)
     {
         erase_window(win);
-        attron(COLOR_PAIR(2) | A_BOLD);
+        attron(COLOR_HEADER);
         mvaddstr(0, 0, "The screen is too small to show the calendar");
-        attroff(COLOR_PAIR(2) | A_BOLD);
+        attroff(COLOR_HEADER);
         refresh();
         return win;
     }
@@ -229,15 +239,15 @@ WINDOW *show_calendar(int year, int month)
     int col = 1;
 
     // Show the month and year
-    wattron(win, COLOR_PAIR(2) | A_BOLD);
+    wattron(win, COLOR_HEADER);
     mvwhline(win, row, col, ' ', width - 2);
     std::string header = format_header(year, month);
     col = (width - header.length()) / 2;
     mvwaddstr(win, row, col, header.c_str());
-    wattroff(win, COLOR_PAIR(2) | A_BOLD);
+    wattroff(win, COLOR_HEADER);
 
     // Draw a line beneath the header
-    wattron(win, COLOR_PAIR(1));
+    wattron(win, COLOR_CALENDAR);
     crlf(row, col);
     mvwaddch(win, row, --col, ACS_LTEE);
     mvwhline(win, row, ++col, ACS_HLINE, width - 2);
@@ -246,12 +256,12 @@ WINDOW *show_calendar(int year, int month)
     // Show the days of the week
     crlf(row, col);
     std::array<std::string, 7> day_strings {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-    wattron(win, COLOR_PAIR(1) | A_UNDERLINE);
+    wattron(win, COLOR_CALENDAR_UNDERLINE);
     for (size_t i = 0; i < day_strings.size(); ++i)
     {
         mvwaddstr(win, row, col + 1 + i * 4, day_strings[i].c_str());
     }
-    wattroff(win, COLOR_PAIR(1) | A_UNDERLINE);
+    wattroff(win, COLOR_CALENDAR_UNDERLINE);
 
     // Show the days
     auto cell = first_dow;
@@ -260,20 +270,20 @@ WINDOW *show_calendar(int year, int month)
     {
         if (showing_this_month && day == today.day)
         {
-            wattron(win, COLOR_PAIR(2) | A_BOLD | A_REVERSE);
+            wattron(win, COLOR_CURRENT_DAY);
             mvwputnum(win, row + (cell / 7), col + day_width + (cell % 7) * col_space, day, day_width);
-            wattroff(win, COLOR_PAIR(2) | A_REVERSE);
+            wattroff(win, COLOR_CURRENT_DAY);
         }
         else
         {
-            wattron(win, COLOR_PAIR(1) | A_BOLD);
+            wattron(win, COLOR_CALENDAR_BOLD);
             mvwputnum(win, row + (cell / 7), col + day_width + (cell % 7) * col_space, day, day_width);
-            wattroff(win, COLOR_PAIR(1) | A_BOLD);
+            wattroff(win, COLOR_CALENDAR_BOLD);
         }
         ++cell;
     }
 
-    attroff(COLOR_PAIR(1));
+    attroff(COLOR_CALENDAR);
     wrefresh(win);
     return win;
 }
