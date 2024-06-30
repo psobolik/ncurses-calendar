@@ -252,7 +252,8 @@ WINDOW *show_calendar(int year, int month)
     mvwaddch(win, row, --col, ACS_LTEE);
     mvwhline(win, row, ++col, ACS_HLINE, width - 2);
     mvwaddch(win, row, width - 1, ACS_RTEE);
-
+    wattroff(win, COLOR_CALENDAR);
+    
     // Show the days of the week
     crlf(row, col);
     std::array<std::string, 7> day_strings {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
@@ -266,6 +267,7 @@ WINDOW *show_calendar(int year, int month)
     // Show the days
     auto cell = first_dow;
     crlf(row, col);
+    wattron(win, COLOR_CALENDAR_BOLD);
     for (int day = 1; day <= days; ++day)
     {
         if (showing_this_month && day == today.day)
@@ -275,15 +277,11 @@ WINDOW *show_calendar(int year, int month)
             wattroff(win, COLOR_CURRENT_DAY);
         }
         else
-        {
-            wattron(win, COLOR_CALENDAR_BOLD);
             mvwputnum(win, row + (cell / 7), col + day_width + (cell % 7) * col_space, day, day_width);
-            wattroff(win, COLOR_CALENDAR_BOLD);
-        }
+            
         ++cell;
     }
-
-    attroff(COLOR_CALENDAR);
+    wattroff(win, COLOR_CALENDAR_BOLD);
     wrefresh(win);
     return win;
 }
