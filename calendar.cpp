@@ -69,7 +69,9 @@ int main(int argc, char **argv)
                 win = show_calendar(year, month);
                 break;
             case KEY_HOME:
-                win = reshow_calendar(win, today.year, today.month);
+                month = today.month;
+                year = today.year;
+                win = reshow_calendar(win, year, month);
                 break;
             case KEY_UP:
                 if (--month < MIN_MONTH)
@@ -92,8 +94,6 @@ int main(int argc, char **argv)
                 break;
             case KEY_NPAGE:
                 win = reshow_calendar(win, ++year, month);
-                break;
-            case KEY_ESC:
                 break;
             default:
                 beep();
