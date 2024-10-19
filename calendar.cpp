@@ -1,3 +1,4 @@
+#include <array>
 #include <string>
 #include <stdexcept>
 #include <ctime>
@@ -275,6 +276,7 @@ WINDOW *show_calendar(int year, int month)
             wattron(win, COLOR_CURRENT_DAY);
             mvwputnum(win, row + (cell / 7), col + day_width + (cell % 7) * col_space, day, day_width);
             wattroff(win, COLOR_CURRENT_DAY);
+	        wattron(win, COLOR_CALENDAR_BOLD);
         }
         else
             mvwputnum(win, row + (cell / 7), col + day_width + (cell % 7) * col_space, day, day_width);
